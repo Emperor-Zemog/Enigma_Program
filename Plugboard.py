@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 import os.path
+import time
 from Lampboard import Lampboard
 from Rotors import Rotors
 from Machine import Machine
@@ -12,17 +13,21 @@ column_fileListing = [[sg.Text('Directory:'),sg.InputText(size=(25, 1), enable_e
 column_Data = [[sg.Text('Password: '),sg.InputText(size=(25, 1), enable_events=True, key="-PASSWORD-"),sg.Button('Encrypt'),sg.Button('Decrypt')],
             [sg.Multiline(size=(100, 30), key='textbox')]]
 row_Path = [[sg.Text('Path: '), sg.Text(enable_events=True,size=(60, 1) ,key= "-Path-")]]
+row_Terminal = [[ sg.Listbox(values=[], enable_events=False, size=(70, 20), key="-LOG-")]]
 layout = [[sg.Column(row_Path)],
     [sg.HSeparator()],
     [sg.Column(column_fileListing),
         sg.VSeperator(),
-     sg.Column(column_Data)],[sg.HSeparator()]
+     sg.Column(column_Data)],[sg.HSeparator()],
+          [sg.Column(row_Terminal, justification='center')]
 ]  # identify the multiline via key option
 
 # Create the Window
 window = sg.Window('Enigma MK-0-A0', layout).Finalize()
 window.Maximize()
 mach = Machine()
+start_time = time.time()
+sys_log=[]
 rot = Rotors()
 fileVal=""
 lBoard = Lampboard()
@@ -75,7 +80,11 @@ while True:
 
         filename = mach.get_fName()
         if filename == "" or fileVal == "":
-            print("empty")
+            time_dif = time.time() - start_time
+            e_Message = "%s: Can't Load -File Name field is empty" % round(time_dif, 2)
+            print(e_Message)
+            sys_log.append(e_Message)
+            window["-LOG-"].update(sys_log)
         else:
 
             en_Data = lBoard.bLoad_pFile(filename)
@@ -86,8 +95,13 @@ while True:
             window["textbox"].update(en_Data)
     elif event == "Save":
         filename = mach.get_fName()
-        if filename == "":
-            print("empty")
+        if filename == "" or fileVal == "":
+            time_dif = time.time() - start_time
+
+            e_Message = "%s: Can't Save -File Name field is empty" % round(time_dif, 2)
+            print(e_Message)
+            sys_log.append(e_Message)
+            window["-LOG-"].update(sys_log)
         else:
             pSalt = mach.get_pSalt()
             pIV = mach.get_pIV()
@@ -95,40 +109,58 @@ while True:
             lBoard.bWrite_pFile(filename,pSalt,pIV,pCy_data)
     elif event == "Encrypt":
         pPWord = values["-PASSWORD-"]
-        rot.set_Password(pPWord)
-        pSalt = mach.get_pSalt()
+        if pPWord == "":
+            time_dif = time.time() - start_time
 
-        if pSalt == b'':
-            print("salt will be made in rot")
+            e_Message = "%s: Can't Encrypt -Password field is empty" % round(time_dif, 2)
+            print(e_Message)
+            sys_log.append(e_Message)
+            window["-LOG-"].update(sys_log)
         else:
-            rot.set_salt(pSalt)
-        rot.make_key()
-        en_Data = values["textbox"]
-        crp_Data = rot.encrypt_data(bytes(en_Data, 'utf-8'))
-        mach.set_pCy_data(crp_Data)
+            rot.set_Password(pPWord)
+            pSalt = mach.get_pSalt()
 
-        mach.set_pIV(rot.get_iv())
-        mach.set_pSalt(rot.get_salt())
-        window["textbox"].update(crp_Data)
+            if pSalt == b'':
+                time_dif = time.time() - start_time
+                print("%s: salt will be made in rot" % round(time_dif, 2))
+            else:
+                rot.set_salt(pSalt)
+            rot.make_key()
+            en_Data = values["textbox"]
+            crp_Data = rot.encrypt_data(bytes(en_Data, 'utf-8'))
+            mach.set_pCy_data(crp_Data)
+
+            mach.set_pIV(rot.get_iv())
+            mach.set_pSalt(rot.get_salt())
+            window["textbox"].update(crp_Data)
     elif event == "Decrypt":
         pPWord = values["-PASSWORD-"]
-        rot.set_Password(pPWord)
-        pSalt = mach.get_pSalt()
+        if pPWord == "":
+            time_dif = time.time() - start_time
 
-        if pSalt == b'':
-            print("salt will be made in rot")
+            e_Message = "%s: Can't Decrypt -Password field is empty" % round(time_dif, 2)
+            print(e_Message)
+            sys_log.append(e_Message)
+            window["-LOG-"].update(sys_log)
         else:
-            rot.set_salt(pSalt)
-        rot.make_key()
-        pIV = mach.get_pIV()
-        eData = mach.get_pCy_data()
-        print(eData)
-        print(pIV)
-        en_Data = rot.decrypt_data(eData,pIV)
+            rot.set_Password(pPWord)
+            pSalt = mach.get_pSalt()
+
+            if pSalt == b'':
+                time_dif = time.time() - start_time
+                print("%s: salt will be made in rot" % round(time_dif, 2))
+            else:
+                rot.set_salt(pSalt)
+            rot.make_key()
+            pIV = mach.get_pIV()
+            eData = mach.get_pCy_data()
+            print(eData)
+            print(pIV)
+            en_Data = rot.decrypt_data(eData,pIV)
 
 
-        clear_Data = str(en_Data, 'UTF-8')
-        window["textbox"].update(clear_Data)
+            clear_Data = str(en_Data, 'UTF-8')
+            window["textbox"].update(clear_Data)
 
 
 window.close()
