@@ -24,6 +24,7 @@ window = sg.Window('Enigma MK-0-A0', layout).Finalize()
 window.Maximize()
 mach = Machine()
 rot = Rotors()
+fileVal=""
 lBoard = Lampboard()
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
@@ -57,7 +58,7 @@ while True:
             window["-FILE-"].update(values["-FILE LIST-"])
             window["-Path-"].update(filename)
             mach.set_fName(filename)
-
+            fileVal = values["-FILE LIST-"][0]
         except:
             pass
     elif event == "-FILE-":
@@ -67,18 +68,18 @@ while True:
             )
             window["-Path-"].update(filename)
             mach.set_fName(filename)
-
+            fileVal = values["-FILE-"]
         except:
             pass
     elif event == "Load":
 
         filename = mach.get_fName()
-        if filename == "":
+        if filename == "" or fileVal == "":
             print("empty")
         else:
 
             en_Data = lBoard.bLoad_pFile(filename)
-
+            print(filename)
             mach.set_pIV(lBoard.get_pIV())
             mach.set_pCy_data(en_Data)
             mach.set_pSalt(lBoard.get_pSalt())
