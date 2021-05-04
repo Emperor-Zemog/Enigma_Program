@@ -13,13 +13,15 @@ column_fileListing = [[sg.Text('Directory:'),sg.InputText(size=(25, 1), enable_e
 column_Data = [[sg.Text('Password: '),sg.InputText(size=(25, 1), enable_events=True, key="-PASSWORD-"),sg.Button('Encrypt'),sg.Button('Decrypt')],
             [sg.Multiline(size=(100, 30), key='textbox')]]
 row_Path = [[sg.Text('Path: '), sg.Text(enable_events=True,size=(60, 1) ,key= "-Path-")]]
-row_Terminal = [[ sg.Listbox(values=[], enable_events=False, size=(70, 20), key="-LOG-")]]
+row_Terminal = [[sg.Text('System Log')], [ sg.Listbox(values=[], enable_events=False, size=(70, 20), key="-LOG-")]]
+column_Encrypted_Data=[[sg.Text('Encrypted Values')], [sg.Multiline( size=(70, 20), key="-Encrypted-")]] # might want to look into better output option
 layout = [[sg.Column(row_Path)],
     [sg.HSeparator()],
     [sg.Column(column_fileListing),
         sg.VSeperator(),
      sg.Column(column_Data)],[sg.HSeparator()],
-          [sg.Column(row_Terminal, justification='center')]
+          [sg.Column(row_Terminal, justification='center'),sg.VSeperator(),
+           sg.Column(column_Encrypted_Data, justification='center')]
 ]  # identify the multiline via key option
 
 # Create the Window
@@ -93,6 +95,7 @@ while True:
             mach.set_pCy_data(en_Data)
             mach.set_pSalt(lBoard.get_pSalt())
             window["textbox"].update(en_Data)
+            window["-Encrypted-"].update(en_Data)
     elif event == "Save":
         filename = mach.get_fName()
         if filename == "" or fileVal == "":
@@ -133,6 +136,7 @@ while True:
             mach.set_pIV(rot.get_iv())
             mach.set_pSalt(rot.get_salt())
             window["textbox"].update(crp_Data)
+            window["-Encrypted-"].update(crp_Data)
     elif event == "Decrypt":
         pPWord = values["-PASSWORD-"]
         if pPWord == "":
