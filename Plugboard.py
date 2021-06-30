@@ -27,6 +27,7 @@ layout = [[sg.Column(row_Path)],
 # Create the Window
 window = sg.Window('Enigma MK-0-A0', layout).Finalize()
 window.Maximize()
+
 mach = Machine()
 start_time = time.time()
 sys_log=[]
@@ -94,7 +95,7 @@ while True:
             mach.set_pIV(lBoard.get_pIV())
             mach.set_pCy_data(en_Data)
             mach.set_pSalt(lBoard.get_pSalt())
-            window["textbox"].update(en_Data)
+            ## window["textbox"].update(en_Data)
             window["-Encrypted-"].update(en_Data)
     elif event == "Save":
         filename = mach.get_fName()
@@ -135,7 +136,7 @@ while True:
 
             mach.set_pIV(rot.get_iv())
             mach.set_pSalt(rot.get_salt())
-            window["textbox"].update(crp_Data)
+            ## window["textbox"].update(crp_Data)
             window["-Encrypted-"].update(crp_Data)
     elif event == "Decrypt":
         pPWord = values["-PASSWORD-"]
