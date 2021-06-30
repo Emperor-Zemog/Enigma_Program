@@ -25,7 +25,7 @@ layout = [[sg.Column(row_Path)],
 ]  # identify the multiline via key option
 
 # Create the Window
-window = sg.Window('Enigma MK-0-A0', layout).Finalize()
+window = sg.Window('Enigma MK-0-A2', layout).Finalize()
 window.Maximize()
 
 mach = Machine()
@@ -44,6 +44,12 @@ while True:
     print(values['textbox'])  # get the content of multiline via its unique key
     if event == "Refresh" or event == "-FOLDER-":
         folder = values["-FOLDER-"]
+        filename = mach.get_fName()
+        if filename == "":
+            window["-Path-"].update(folder)
+        else:
+            window["-Path-"].update(filename)
+
         try:
         # Get list of files in folder
             file_list = os.listdir(folder)
